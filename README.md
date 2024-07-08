@@ -6,11 +6,11 @@ write a smart contract that implements the require(), assert() and revert() stat
 
 ## Description  
 The smart contract demonstrates the use of require(), assert(), and revert() statements. 
-## Mint Function:
+**Mint Function:**
 Increases totalSupply and updates the balance of the specified address. Can only be called by the owner.
-## Burn Function:
+**Burn Function:**
 Decreases totalSupply and updates the balance of the specified address. Reverts with a custom error if the balance is insufficient. Can only be called by the owner.
-## Transfer Function:
+**Transfer Function:**
 Transfers tokens from the caller's address to another address. Uses require() to ensure the sender has enough balance.
 
 ## Getting Started
