@@ -24,71 +24,72 @@ To run this program, you can use Remix, an online Solidity IDE. To get started, 
 Once you are on the Remix website, create a new file by clicking on the "+" icon in the left-hand sidebar. Save the file with a .sol extension (e.g., HelloWorld.sol). Copy and paste the following code into the file:
 ```javascript
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.0;
 
-contract MyToken {
+contract RewardPoints {
+    // State variables
+    mapping(address => uint256) public points;
     address public owner;
 
-// Constructor to set the contract deployer as the owner
-   
-    constructor(){
+    event PointsEarned(address indexed user, uint256 amount);
+    event PointsRedeemed(address indexed user, uint256 amount);
+    event PointsTransferred(address indexed from, address indexed to, uint256 amount);
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can call this function");
+        _;
+    }
+
+    constructor() {
         owner = msg.sender;
     }
 
-//public variables
- 
-  string public name = "Sunidhi";
-  string public abbrv = "SUNN";
-  uint public total_supply = 0;
-  mapping(address => uint)public balances;
+    // Function to earn points
+    function earnPoints(uint256 _amount) public {
+        require(_amount > 0, "Amount must be greater than zero");
 
-//events
- 
-  event Mint(address indexed to, uint amount);
-  event Burn(address indexed from, uint amount);
-  event Transfer(address indexed from, address indexed to, uint amount );
+        points[msg.sender] += _amount;
 
-// Custom error
- 
-  error InsufficientBalance(uint balance, uint withdrawlAmount);
+        emit PointsEarned(msg.sender, _amount);
+        assert(points[msg.sender] >= _amount); // Ensure points are added correctly
+    }
 
-// Modifier to restrict access to the owner
-   
-modifier onlyOwner{
-    assert(msg.sender == owner);
-    _;
+    // Function to redeem points
+    function redeemPoints(uint256 _amount) public {
+        require(_amount > 0, "Amount must be greater than zero");
+        require(points[msg.sender] >= _amount, "Insufficient points");
+
+        points[msg.sender] -= _amount;
+
+        emit PointsRedeemed(msg.sender, _amount);
+        assert(points[msg.sender] + _amount == points[msg.sender] + _amount); // Ensure points are deducted correctly
+    }
+
+    // Function to transfer points to another user
+    function transferPoints(address _to, uint256 _amount) public {
+        require(_to != address(0), "Invalid address");
+        require(_amount > 0, "Amount must be greater than zero");
+        require(points[msg.sender] >= _amount, "Insufficient points");
+
+        points[msg.sender] -= _amount;
+        points[_to] += _amount;
+
+        emit PointsTransferred(msg.sender, _to, _amount);
+        assert(points[msg.sender] >= 0); // Ensure balance is valid
+    }
+
+    // Function to get the balance of points for a specific user
+    function getPoints(address _user) public view returns (uint256) {
+        return points[_user];
+    }
+
+    // Function to set points for a user (only callable by the owner)
+    function setPoints(address _user, uint256 _amount) public onlyOwner {
+        points[_user] = _amount;
+        emit PointsEarned(_user, _amount);
+    }
 }
 
-// mint function
-
-function mint(address a_address, uint v_value) public onlyOwner{
-     total_supply += v_value;
-        balances[a_address] +=v_value;
-        emit Mint(a_address, v_value);
-}
-
-// burn function
-
-function burn(address a_address, uint v_value) public onlyOwner{
-    if(balances[a_address] <= v_value){
-        revert InsufficientBalance({balance: balances[a_address], withdrawlAmount: v_value});
-    } else{
-         total_supply -= v_value;
-           balances[a_address] -= v_value;
-           emit Burn(a_address, v_value);
-    }          
-}
-
-// transfer function
-
-function transfer(address r_reciever, uint v_value) public {
-    require(balances[msg.sender]>= v_value, "Account balance must be greater than transfered value");
-    balances[msg.sender] -= v_value;
-    balances[r_reciever] += v_value;
-    emit Transfer(msg.sender, r_reciever, v_value);
-}
-}
 ```
 ## Executing program    
 ### How to Run the Program      
